@@ -1,23 +1,28 @@
 mod.service('ScrollSpy', function($window) {
-	var rawData= function(w) {
+
+	var rawData= function(scopeElem) {
+        
+        var $scopeElem = angular.element(scopeElem);
+
         // Fix for IE browsers
         // See https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollY?redirectlocale=en-US&redirectslug=DOM%2Fwindow.scrollY for more info
-        var innerWidth = w.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-        var innerHeight = w.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-        var supportPageOffset = w.pageXOffset !== undefined;
+        var innerWidth = $scopeElem.innerWidth() || document.documentElement.clientWidth || document.body.clientWidth;
+        var innerHeight = $scopeElem.innerHeight() || document.documentElement.clientHeight || document.body.clientHeight;
+        var supportPageOffset = scopeElem.pageXOffset !== undefined;
         var isCSS1Compat = ((document.compatMode || "") === "CSS1Compat");
 
-        var scrollX = supportPageOffset ? w.pageXOffset : isCSS1Compat ? document.documentElement.scrollLeft : document.body.scrollLeft;
-        var scrollY= supportPageOffset ? w.pageYOffset : isCSS1Compat ? document.documentElement.scrollTop : document.body.scrollTop;
+        // Where shall I use theygit?
+        var scrollX = supportPageOffset ? scopeElem.pageXOffset : isCSS1Compat ? document.documentElement.scrollLeft : document.body.scrollLeft;
+        var scrollY= supportPageOffset ? scopeElem.pageYOffset : isCSS1Compat ? document.documentElement.scrollTop : document.body.scrollTop;
 
 		// retrieve interesting data
 		var raw= {
-			width: w.innerWidth,
-			height: w.innerHeight,
-			maxWidth: w.document.body.scrollWidth,
-			maxHeight: w.document.body.scrollHeight,
-			posX: w.scrollX || w.pageXOffset || w.document.documentElement.scrollLeft,
-			posY: w.scrollY || w.pageYOffset || w.document.documentElement.scrollTop
+			width: innerWidth,
+			height: innerHeight,
+			maxWidth: scopeElem.scrollWidth,
+			maxHeight: scopeElem.scrollHeight,
+			posX: $scopeElem.scrollLeft() || scopeElem.pageXOffset || document.documentElement.scrollLeft,
+			posY: $scopeElem.scrollTop() || scopeElem.pageYOffset || document.documentElement.scrollTop,
 		};
 
 		// remove but log overscroll
@@ -83,7 +88,8 @@ mod.service('ScrollSpy', function($window) {
 	var handlers= {};
 	var lastPos;
 	var scrollHandler= function(force) {
-		var curPos= rawData($window);
+		//var curPos= rawData($window);
+		var curPos= rawData(angular.element('#content')[0]);
 		var delta= getDelta(lastPos, curPos);
 		if(!delta.isEqual || curPos.hasOverscroll || force) {
 			for(var k in handlers) {
@@ -95,7 +101,8 @@ mod.service('ScrollSpy', function($window) {
 			lastPos= curPos;
 		}
 	};
-	angular.element($window).on('scroll', scrollHandler);
+	//angular.element($window).on('scroll', scrollHandler);
+	angular.element(angular.element('#content')).on('scroll', scrollHandler);
 
 	var self= this;
 
